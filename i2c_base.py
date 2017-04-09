@@ -18,6 +18,29 @@ class I2CDevice():
         returned as a bytearray """
         raise NotImplemented()
 
+class Generic_I2CDevice(I2CDevice):
+    def __init__(self, address, bus):
+        super().__init__(address)
+        from periphery import I2C
+        self._bus = "/dev/i2c-" + bus
+
+    def write_list(self, register, data):
+        # TODO: figure out how to actually write the data, this has only been
+        # tested with the HTU21d block.
+        if isinstance(register, int):
+            register = register.to_bytes(1, 'big')
+        i2c = I2C(self._bus)
+        msgs = [I2C.Message(register),I2C.Message(data)]
+        i2c.transfer(self._address, msgs)
+        i2c.close()
+
+    def read_bytes(self, length):
+        #returns list of length 'length'
+        i2c = I2C(self._bus)
+        msgs = [I2C.Message([0x00]*length, read=True)]
+        i2c.transfer(self._address, msgs)
+        i2c.close()
+        return msgs[0].data
 
 class RaspberryPi_I2CDevice(I2CDevice):
 
@@ -66,6 +89,7 @@ class FT232H_I2CDevice(I2CDevice):
 class Platform(Enum):
     raspberry_pi = 0
     ft232h = 1
+    generic = 2
 
 
 class I2CBase(Block):
@@ -74,8 +98,9 @@ class I2CBase(Block):
 
     platform = SelectProperty(Platform,
                               title='Platform',
-                              default=Platform.raspberry_pi)
+                              default=Platform.generic)
     address = StringProperty(title='I2C Address', default="0x00")
+    bus = StringProperty(title='Bus', default='1')
 
     def __init__(self):
         super().__init__()
@@ -93,6 +118,8 @@ class I2CBase(Block):
             logging.getLogger('Adafruit_GPIO.FT232H').setLevel(
                 self.logger.logger.level)
             self._i2c = FT232H_I2CDevice(address)
+        elif self.platform().value == Platform.generic.value:
+            self._i2c = Generic_I2CDevice(address, self.bus())
         else:
             self.logger.warning("Warning! Unknown device adaptor type.")
             self._i2c = I2CDevice(address)
