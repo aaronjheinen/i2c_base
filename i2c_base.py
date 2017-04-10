@@ -21,12 +21,12 @@ class I2CDevice():
 class Generic_I2CDevice(I2CDevice):
     def __init__(self, address, bus):
         super().__init__(address)
-        from periphery import I2C
         self._bus = "/dev/i2c-" + bus
 
     def write_list(self, register, data):
         # TODO: figure out how to actually write the data, this has only been
         # tested with the HTU21d block.
+        from periphery import I2C
         if isinstance(register, int):
             register = register.to_bytes(1, 'big')
         i2c = I2C(self._bus)
@@ -36,6 +36,7 @@ class Generic_I2CDevice(I2CDevice):
 
     def read_bytes(self, length):
         #returns list of length 'length'
+        from periphery import I2C
         i2c = I2C(self._bus)
         msgs = [I2C.Message([0x00]*length, read=True)]
         i2c.transfer(self._address, msgs)
