@@ -37,7 +37,7 @@ class Generic_I2CDevice(I2CDevice):
         from periphery import I2C
         i2c = I2C(self._bus)
         self._msg.append(I2C.Message([0x00]*length, read=True))
-        i2c.transfer(self._address, msgs)
+        i2c.transfer(self._address, self._msg)
         i2c.close()
         return self._msg[-1].data
 
