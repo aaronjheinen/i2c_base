@@ -25,8 +25,8 @@ class Generic_I2CDevice(I2CDevice):
         self._msg = []
 
     def write_list(self, register, data):
-        # Periphery I2C requires a read with every transfer, so here we
-        #  queue up register writes
+        # HTU block is written badly, so this is the work around for now
+        #  stored register to write to and then call read to read
         from periphery import I2C
         if isinstance(register, int):
             register = register.to_bytes(1, 'big')
