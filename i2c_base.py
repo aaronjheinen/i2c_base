@@ -32,7 +32,9 @@ class Generic_I2CDevice(I2CDevice):
             register = register.to_bytes(1, 'big')
         self._msg = [I2C.Message(register)]
 
-    @tenacity.retry(stop=tenacity.stop_after_attempt(5),retry=retry_if_exception_type(tenacity.TryAgain))
+    @tenacity.retry(stop=tenacity.stop_after_attempt(12),
+        retry=tenacity.retry_if_exception_type(tenacity.TryAgain),
+         wait=tenacity.wait_fixed(0.5))
     def read_bytes(self, length):
         #returns list of length 'length'
         from periphery import I2C, I2CError
@@ -41,7 +43,6 @@ class Generic_I2CDevice(I2CDevice):
         try:
             i2c.transfer(self._address, self._msg)
         except I2CError as err:
-            self.logger.debug('Bus {} had the following error: {}'.format(self._bus,err))
             self._msg.pop()
             raise tenacity.TryAgain
         i2c.close()
