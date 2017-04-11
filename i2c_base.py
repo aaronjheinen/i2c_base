@@ -2,7 +2,7 @@ from enum import Enum
 import logging
 from nio.block.base import Block
 from nio.properties import SelectProperty, StringProperty
-
+import tenacity
 
 class I2CDevice():
 
@@ -32,14 +32,22 @@ class Generic_I2CDevice(I2CDevice):
             register = register.to_bytes(1, 'big')
         self._msg = [I2C.Message(register)]
 
+    @tenacity.retry(stop=tenacity.stop_after_attempt(5),retry=retry_if_exception_type(tenacity.TryAgain))
     def read_bytes(self, length):
         #returns list of length 'length'
-        from periphery import I2C
+        from periphery import I2C, I2CError
         i2c = I2C(self._bus)
         self._msg.append(I2C.Message([0x00]*length, read=True))
-        i2c.transfer(self._address, self._msg)
+        try:
+            i2c.transfer(self._address, self._msg)
+        except I2CError as err:
+            self.logger.debug('Bus {} had the following error: {}'.format(self._bus,err))
+            self._msg.pop()
+            raise tenacity.TryAgain
         i2c.close()
-        return self._msg[-1].data
+        return_data = self._msg[-1].data
+        self._msg=[]
+        return return_data
 
 class RaspberryPi_I2CDevice(I2CDevice):
 
