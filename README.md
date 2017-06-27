@@ -6,15 +6,16 @@ This base block is to help write blocks that communicate with chips over I2C. It
 Properties
 ----------
 
--   **platform**: The Platform used for i2c communication (ex. Raspberry Pi, Edison, FT232H)
--   **I2C_address**: I2C address to communicate with (ex. '0x40')
+-   **platform**: The Platform used for i2c communication (e.g. RaspberryPi|Edison|FT232H|...)
+-   **I2C_address**: I2C address to communicate with (e.g. '0x40')
 
 Dependencies
 ------------
 
 Not all dependencies are required for all uses of the block. It matters what `Platform` you are using.
 
-###FT232H
+FT232H
+-----------
 
 Communicate I2C over USB with a [FT232H chip](http://www.adafruit.com/product/2264).
 

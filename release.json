@@ -1,0 +1,7 @@
+{
+  "nio/I2CBase": {
+    "Version": "1.0.0",
+    "Reference": "github.com/nio-blocks/i2c_base.git@v1.0.0",
+    "Language": "Python"
+  }
+}
